@@ -2,30 +2,37 @@
    Automatic drinking fountain for cats
 */
 
-const int pirRelay = 6;
+const int pirPin = 6;
 const int pumpRelay = 7;
+const int fountainTimeout = 10000; // Time in milliseconds of no motion detection before water shutoff
 
 unsigned long pirStart;
 
 void setup() {
   pinMode(pumpRelay, OUTPUT); digitalWrite(pumpRelay, LOW);
-  pinMode(pirPin, INPUT);
 
   Serial.begin(9600);
 }
 
 void loop() {
-  bool pirVal = digitalRead(pirPin);
+  int pirVal = analogRead(pirPin);
+  Serial.println(pirVal);
 
-  if (pirVal) {
+  if (pirVal > 300) {
     pirStart = millis();
     digitalWrite(pumpRelay, HIGH);
+    Serial.println("Relay HIGH");
 
     for (pirStart = millis; (millis() - pirStart) < fountainTimeout; ) {
-      if (pirVal) pirStart = millis();
-      delay(500);
+      pirVal = analogRead(pirPin);
+      Serial.println(pirVal);
+      if (pirVal > 300) pirStart = millis();
+      delay(1000);
     }
 
     digitalWrite(pumpRelay, LOW);
+    Serial.println("Relay LOW");
   }
+
+  delay(1000);
 }
